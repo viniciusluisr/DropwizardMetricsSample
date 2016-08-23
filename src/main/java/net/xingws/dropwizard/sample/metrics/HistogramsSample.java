@@ -6,9 +6,11 @@ package net.xingws.dropwizard.sample.metrics;
 import java.util.Random;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
+import java.util.concurrent.TimeUnit;
 
 import com.codahale.metrics.Histogram;
 import com.codahale.metrics.MetricRegistry;
+import com.codahale.metrics.SlidingTimeWindowReservoir;
 
 import net.xingws.dropwizard.sample.reporter.Reporter;
 
@@ -29,7 +31,7 @@ public class HistogramsSample {
 	 */
 	public static void main(String[] args) {
 		  reporter = new Reporter(metrics, 10);
-		  Histogram histogram = metrics.histogram("histogram.test");
+		  Histogram histogram =  metrics.register("histogram.test", new Histogram(new SlidingTimeWindowReservoir(1, TimeUnit.MINUTES)));
 	      
 	      for(int i=0; i<NUM_SERVICES;++i) {
 	    	  Runner1 runner = new Runner1(histogram);
@@ -54,8 +56,10 @@ class Runner1 implements Runnable {
 	private Histogram histogram;
 	private static Random rand=new Random();
 	
-	public Runner1(Histogram histogram) {
+	public Runner1(Histogram histogram) {//MetricRegistry metrics, String name) {
 		this.histogram = histogram;
+		//this.histogram = metrics.register(name, new Histogram(new SlidingTimeWindowReservoir(1, TimeUnit.MINUTES)));
+		//this.histogram = metrics.histogram(name);
 	}
 	
 	@Override
